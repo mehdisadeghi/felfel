@@ -1,0 +1,24 @@
+[package]
+name = "felfel"
+version = "0.1.1"
+authors = ["Mehdi Sadeghi <mehdi@mehdix.org>"]
+edition = "2018"
+description = "A Rust library and CLI tool for Farsi compound noun generation."
+repository = "https://github.com/mehdisadeghi/felfel"
+license = "MIT"
+
+[dependencies]
+wasm-bindgen = "0.2.68"
+getrandom = { version = "0.2", features = ["js"] }
+
+[lib]
+name = "felfel"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "felfel"
+path = "src/bin.rs"
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
