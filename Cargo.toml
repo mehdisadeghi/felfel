@@ -9,7 +9,7 @@ license = "MIT"
 
 [dependencies]
 wasm-bindgen = "0.2.68"
-getrandom = { version = "0.2", features = ["js"] }
+rand = { version = "0.7.3", features = ["wasm-bindgen"] }
 
 [lib]
 name = "felfel"
@@ -21,4 +21,4 @@ name = "felfel"
 path = "src/bin.rs"
 
 [package.metadata.wasm-pack.profile.release]
-wasm-opt = false
+wasm-opt = ["-Oz", "--enable-mutable-globals"]

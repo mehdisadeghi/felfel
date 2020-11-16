@@ -1,169 +1,203 @@
+extern crate rand;
+
+use rand::thread_rng;
+use rand::Rng;
 use wasm_bindgen::prelude::*;
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
-
-/// Generates a name + adjective combo with a numeric suffix.
-///
-/// # Arguments
-///
-/// * `token` - Largest numeric suffix
-/// * `spe` - A string seperator
+/// Generates a Farsi compound name.
 ///
 /// # Example
 ///
 /// ```
 /// use felfel::lib;
-/// fel(0, " ");
+/// gen();
 /// ```
 #[wasm_bindgen]
 pub fn gen() -> String {
-    let sep = ' ';
+    generate(0, ' ', false)
+}
 
-    let mut buf = [0u8; 2];
-    getrandom::getrandom(&mut buf).unwrap();
+/// Generates a Farsi compound name with a numeric suffix.
+///
+/// # Example
+///
+/// ```
+/// use felfel::lib;
+/// gen_id();
+/// ```
+#[wasm_bindgen]
+pub fn gen_id() -> String {
+    generate(9999, '-', true)
+}
 
-    let a = buf[0] as usize % NAMES.len() as usize;
-    let mut out = String::from(NAMES[a]);
+/// Generates a Farsi compound name with a numeric suffix.
+///
+/// # Arguments
+///
+/// * `token_range` - Largest numeric suffix
+/// * `delimiter` - The separator charachter
+/// * `use_latin` - Map characters to Latin
+///
+/// # Example
+///
+/// ```
+/// use felfel::lib;
+/// generate(256, "~", true);
+/// ```
+fn generate(token_range: u32, delimiter: char, use_latin: bool) -> String {
+    let mut rng = thread_rng();
+    let a = rng.gen_range(0, NAMES.len());
+    let mut out = String::from(if use_latin {NAMES[a].1} else {NAMES[a].0});
+
     if out.ends_with('ه') || out.ends_with('و') {
         out.push('‌');
         out.push('ی');
     }
-    out.push(sep);
-    let b = buf[1] as usize % ADJECTIVES.len();
-    out.push_str(ADJECTIVES[b]);
 
-    return out;
+    if out.ends_with('e') || out.ends_with('i') || out.ends_with('o'){
+        out.push_str("‌ye");
+    } else if use_latin {
+        out.push('e');
+    }
+
+    out.push(delimiter);
+
+    let b = rng.gen_range(0, ADJECTIVES.len());
+    out.push_str(if use_latin {ADJECTIVES[b].1} else {ADJECTIVES[b].0});
+
+    if token_range > 0 {
+        let roll = rng.gen_range(1, token_range);
+        out.push(delimiter);
+        out.push_str(&format!("{}", roll));
+    }
+
+    if !use_latin {
+        out = out.chars()
+        .map(|x| match x { 
+            '0' => '۰',
+            '1' => '۱',
+            '2' => '۲',
+            '3' => '۳',
+            '4' => '۴',
+            '5' => '۵',
+            '6' => '۶',
+            '7' => '۷',
+            '8' => '۸',
+            '9' => '۹',
+            _ => x
+        }).collect();
+    }
+
+    return out;   
 }
 
-#[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
-}
-
-#[wasm_bindgen]
-pub fn greet() {
-    alert(gen().as_str())
-}
-
-const NAMES: &[&str] = &[
-    "گوش‌دراز",
-    "جوجه",
-    "پشه",
-    "سیب‌زمینی",
-    "پرنده",
-    "حلزون",
-    "خرگوش",
-    "اسب",
-    "طوطی",
-    "گوزن",
-    "آهو",
-    "فیل",
-    "مورچه",
-    "مورچه‌خوار",
-    "موش",
-    "گربه",
-    "سگ",
-    "ماهی",
-    "مرغ‌دریایی",
-    "خرگوش",
-    "اسب آبی",
-    "فیل آبی",
-    "زرافه",
-    "اختاپوس",
-    "دلقک",
-    "کرگردن",
-    "مهاجر",
-    "مترسک",
-    "شاپرک",
-    "کبوتر",
-    "پروانه",
-    "قورباغه",
-    "شاهین",
-    "سیمرغ",
-    "سنجاب",
-    "یوز",
-    "قرقی",
-    "تمساح",
-    "برنامه‌نویس",
-    "هکر",
-    "دارکوب",
-    "زنبور",
-    "ساقی",
-    "میمونک",
+const NAMES: &[(&str, &str)] = &[
+    ("جوجه", "jooje"),
+    ("پشه", "pashe"),
+    ("سیب‌زمینی", "sibzamini"),
+    ("پرنده", "parande"),
+    ("حلزون", "halazoon"),
+    ("خرگوش", "khargoosh"),
+    ("اسب", "asb"),
+    ("طوطی", "tooti"),
+    ("گوزن", "gavazn"),
+    ("آهو", "ahoo"),
+    ("فیل", "fil"),
+    ("مورچه", "moorche"),
+    ("مورچه‌خوار", "moorchekhar"),
+    ("موش", "moosh"),
+    ("گربه", "gorbe"),
+    ("سگ", "sag"),
+    ("ماهی", "mahi"),
+    ("مرغ‌دریایی", "morghedaryayi"),
+    ("اسب آبی", "asbeabi"),
+    ("فیل آبی", "fileabi"),
+    ("زرافه", "zarafe"),
+    ("اختاپوس", "okhtapoos"),
+    ("دلقک", "dalghak"),
+    ("کرگدن", "kargadan"),
+    ("مهاجر", "mohajer"),
+    ("مترسک", "matarsak"),
+    ("شاپرک", "shaparak"),
+    ("کبوتر", "kabootar"),
+    ("پروانه", "parvane"),
+    ("قورباغه", "ghoorbaghe"),
+    ("شاهین", "shahin"),
+    ("سیمرغ", "simorgh"),
+    ("سنجاب", "sanjab"),
+    ("یوز", "yooz"),
+    ("قرقی", "gherghi"),
+    ("تمساح", "temsah"),
+    ("برنامه‌نویس", "barnamenevis"),
+    ("هکر", "hacker"),
+    ("دارکوب", "darkoob"),
+    ("زنبور", "zanboor"),
+    ("ساقی", "saaghi"),
+    ("میمونک", "meymoonak"),
+    ("نهنگ", "nahang"),
 ];
 
-const ADJECTIVES: &[&str] = &[
-    "هشیار",
-    "دیوانه",
-    "پرمشغله",
-    "خوشفکر",
-    "مبهوت",
-    "دوست‌داشتنی",
-    "خسته",
-    "کنجکاو",
-    "نابغه",
-    "نگران",
-    "امیدوار",
-    "چالاک",
-    "مهربان",
-    "چابک",
-    "تیزپا",
-    "هوشمند",
-    "شاعر",
-    "غول‌پیکر",
-    "بی‌همتا",
-    "بی‌نظیر",
-    "خجالتی",
-    "سیری‌ناپذیر",
-    "زیبا",
-    "اندیشمند",
-    "صبور",
-    "سحرآمیز",
-    "بردبار",
-    "دلسوز",
-    "زودرنج",
-    "خوش‌مشرب",
-    "گشاده‌رو",
-    "جدی",
-    "شجاع",
-    "دست و دلباز",
-    "پرحرف",
-    "بانمک",
-    "چرب‌زبان",
-    "خوشرو",
-    "خوش‌شانس",
-    "خوش‌اقبال",
-    "شوخ‌طبع",
-    "خوابآلو",
-    "خردمند",
-    "مشکوک",
-    "بذله‌گو",
-    "جذاب",
-    "حواس‌پرت",
-    "غمگین",
-    "باوفا",
-    "وفادار",
-    "مؤمن",
-    "فناناپذیر",
-    "تو‌دل‌برو",
-    "افسانه‌ای",
-    "باسابقه",
-    "خوشنام",
-    "جسور",
-    "خستگی‌ناپذیر",
-    "ریزنقش",
-    "بلندپرواز",
-    "جسور",
-    "بی‌پروا",
-    "تسلیم‌ناپذیر",
-    "سمج",
-    "کوچولو",
-    "توانا",
-    "بازیگوش",
+const ADJECTIVES: &[(&str, &str)] = &[
+    ("هشیار", "hoshyar"),
+    ("دیوانه", "divane"),
+    ("پرمشغله", "pormashghale"),
+    ("خوشفکر", "khoshfekr"),
+    ("مبهوت", "mabhoot"),
+    ("دوست‌داشتنی", "doostdashtani"),
+    ("خسته", "khaste"),
+    ("کنجکاو", "konjkav"),
+    ("نابغه", "nabeghe"),
+    ("نگران", "negaran"),
+    ("امیدوار", "omidvar"),
+    ("مهربان", "mehraban"),
+    ("تیزپا", "tizpa"),
+    ("هوشمند", "hooshmand"),
+    ("شاعر", "shaer"),
+    ("درون", "daroon"),
+    ("بی‌همتا", "bihamta"),
+    ("بی‌نظیر", "binazir"),
+    ("خجالتی", "khejalati"),
+    ("سیری‌ناپذیر", "sirinapazir"),
+    ("زیبا", "ziba"),
+    ("اندیشمند", "andishmand"),
+    ("صبور", "saboor"),
+    ("سحرآمیز", "sehramiz"),
+    ("بردبار", "bordbar"),
+    ("دلسوز", "delsooz"),
+    ("زودرنج", "zoodranj"),
+    ("خوش‌مشرب", "khoshmashrab"),
+    ("گشاده‌رو", "goshaderoo"),
+    ("جدی", "jedi"),
+    ("شجاع", "shoja"),
+    ("دست و دلباز", "dashtodelbaz"),
+    ("پرحرف", "porharf"),
+    ("بانمک", "banamak"),
+    ("چرب‌زبان", "charbzaban"),
+    ("خوشرو", "khoshroo"),
+    ("خوش‌شانس", "khoshshans"),
+    ("خوش‌اقبال", "khosheghbal"),
+    ("شوخ‌طبع", "shookhtab"),
+    ("خوابآلو", "khabaloo"),
+    ("خردمند", "kheradmand"),
+    ("مشکوک", "mashkook"),
+    ("بذله‌گو", "bazlegoo"),
+    ("جذاب", "jazab"),
+    ("حواس‌پرت", "havaspart"),
+    ("غمگین", "ghamgin"),
+    ("باوفا", "bavafa"),
+    ("وفادار", "vafadar"),
+    ("مؤمن", "momen"),
+    ("فناناپذیر", "fananapazir"),
+    ("افسانه‌ای", "afsaneyi"),
+    ("قدیمی", "ghadimi"),
+    ("خوشنام", "khoshnam"),
+    ("جسور", "jasoor"),
+    ("خستگی‌ناپذیر", "khasteginapazir"),
+    ("ریزنقش", "riznaqsh"),
+    ("بلندپرواز", "bolandparvaz"),
+    ("بی‌پروا", "biparva"),
+    ("تسلیم‌ناپذیر", "taslimnapazir"),
+    ("سمج", "semej"),
+    ("کوچولو", "koochooloo"),
+    ("بازیگوش", "bazigoosh"),
 ];
