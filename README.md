@@ -25,7 +25,7 @@ Add this to your `Cargo.toml`:
 felfel = 0.1
 ```
 
-Then invoke the `gen` function:
+Then invoke the `gen` or `gen_id` function:
 
 ```rust
 use felfel;
@@ -44,14 +44,14 @@ JavaScript package. First add it to your `package.json`:
 $ npm install felfel
 ```
 
-Then invoke the `gen` function:
+Then invoke the `gen` or `gen_id` function:
 
 ```JavaScript
 import * as felfel from "felfel";
-console.log(felfel.gen());
+console.log(felfel.gen_id()); // -> nahange-shaer-612
 ````
 
-You can also use the output of `wasm-pack build --target no-modules` and upload it somewhere. 
+You can also use the output of `wasm-pack build --target web` and upload it somewhere. See [wasm-bindgen](https://rustwasm.github.io/docs/wasm-bindgen/examples/without-a-bundler.html) book for more info.
 
 ## Development
 The only notable command worth mentioning is the generation of npm package:
